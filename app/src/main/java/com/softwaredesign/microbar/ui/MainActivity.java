@@ -5,9 +5,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -22,13 +25,15 @@ import com.squareup.picasso.Picasso;
 import com.zhy.http.okhttp.callback.StringCallback;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements EditAccountFragment.FragmentCallback{
     private static final String CHECKNEW = "checkMessage";
 
     private PostFragment mainPage;
+    private EditAccountFragment editAccount;
     private PostFragment recentlyWatch;
     private PostFragment commentReply;
     private PostFragment myPost;
+    private Fragment currentFragment;
 
     private SharedPreferences sp;
     private int accountId;
@@ -59,20 +64,7 @@ public class MainActivity extends AppCompatActivity {
         sp = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
 
         accountId = sp.getInt("accountId", -1);
-        String stuNo = sp.getString("stuNo", "");
-        String nickname = sp.getString("nickname", "");
-        String headImageUrl = sp.getString("headImageUrl","");
-        String pwd = sp.getString("PASSWORD", "");
-        userName.setText(nickname);
-        if (!headImageUrl.isEmpty()) {
-            Picasso.with(this)
-                    .load(headImageUrl)
-                    .placeholder(R.drawable.default_portrait)  //默认(加载前)头像
-                    .error(R.drawable.default_portrait)  //加载失败时的头像
-                    .resizeDimen(R.dimen.portrait_width, R.dimen.portrait_height)
-                    .centerInside()
-                    .into(userPortrait);
-        }
+        updateNavHeader();
         checkForNew();
     }
 
@@ -105,29 +97,46 @@ public class MainActivity extends AppCompatActivity {
         navigation.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
+                FragmentTransaction transaction;
                 switch (item.getItemId()) {
                     case R.id.menu_homePage:
-                        if (mainPage == null) {
-                            mainPage = PostFragment.getPostFragment(PostFragment.POSTTYPE.HOMEPAGE);
+                        if (currentFragment != mainPage) {
+                            transaction = getSupportFragmentManager().beginTransaction();
+                            changePageContent(transaction, mainPage);
+                        } else {
+                            Log.d("MainActivity", "当前已经是首页");
                         }
-                        getSupportFragmentManager().beginTransaction().replace(R.id.main_content, mainPage).commit();
                         break;
                     case R.id.menu_editAccount:
+                        // 第一次点击
+                        if (editAccount == null) {
+                            editAccount = EditAccountFragment.getEditAccountFragment();
+                        }
+                        if (currentFragment != editAccount) {
+                            transaction = getSupportFragmentManager().beginTransaction();
+                            changePageContent(transaction, editAccount);
+                        }
                         break;
                     case R.id.menu_recentlyWatch:
                         if (recentlyWatch == null) {
                             recentlyWatch = PostFragment.getPostFragment(PostFragment.POSTTYPE.HISTORY);
                         }
-                        getSupportFragmentManager().beginTransaction().replace(R.id.main_content, recentlyWatch).commit();
+                        if (currentFragment != recentlyWatch) {
+                            transaction = getSupportFragmentManager().beginTransaction();
+                            changePageContent(transaction, recentlyWatch);
+                        }
                         break;
                     case R.id.menu_commentReply:
                         break;
                     case R.id.menu_myPost:
                         if (myPost == null) {
                             myPost = PostFragment.getPostFragment(PostFragment.POSTTYPE.MYPOST);
+                            myPost.setAccountId(accountId);
                         }
-                        myPost.setAccountId(accountId);
-                        getSupportFragmentManager().beginTransaction().replace(R.id.main_content, myPost).commit();
+                        if (currentFragment != myPost) {
+                            transaction = getSupportFragmentManager().beginTransaction();
+                            changePageContent(transaction, myPost);
+                        }
                         break;
                     case R.id.menu_exit:
                         break;
@@ -143,9 +152,33 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void changePageContent(FragmentTransaction transaction, Fragment fragment) {
+        transaction.replace(R.id.main_content, fragment);
+        currentFragment = fragment;
+        transaction.commit();
+    }
+
+    public void updateNavHeader() {
+        String nickname = sp.getString("nickname", "");
+        String headImageUrl = sp.getString("headImageUrl", "");
+        Log.d("MainActivity", nickname);
+        Log.d("MainActivity", headImageUrl);
+        userName.setText(nickname);
+        if (!headImageUrl.isEmpty()) {
+            Picasso.with(this)
+                    .load(headImageUrl)
+                    .placeholder(R.drawable.default_portrait)  //默认(加载前)头像
+                    .error(R.drawable.default_portrait)  //加载失败时的头像
+                    .resizeDimen(R.dimen.portrait_width, R.dimen.portrait_height)
+                    .centerInside()
+                    .into(userPortrait);
+        }
+    }
+
     public void setDefaultFragment() {
         mainPage = PostFragment.getPostFragment(PostFragment.POSTTYPE.HOMEPAGE);
         getSupportFragmentManager().beginTransaction().replace(R.id.main_content, mainPage).commit();
+        currentFragment = mainPage;
     }
 
     private void checkForNew() {

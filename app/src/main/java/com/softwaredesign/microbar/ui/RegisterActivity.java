@@ -141,7 +141,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 public void onError(Request request, Exception e) {
                                     pd.dismiss();
                                     e.printStackTrace();
-                                    Toast.makeText(RegisterActivity.this, "连接失败，请重新注册", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(RegisterActivity.this, "连接失败，请重新注册", Toast.LENGTH_SHORT).show();
                                 }
 
                                 @Override

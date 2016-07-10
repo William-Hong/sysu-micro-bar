@@ -38,6 +38,16 @@ public class UploadUtil {
         return params;
     }
 
+    public static void uploadHeadImage(RequestParams params, String url, int accountId, File file, AsyncHttpResponseHandler asyncHttpResponseHandler) {
+        params.put("accountId", accountId);
+        try {
+            params.put("file", file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        client.post(getAbsoluteUrl(url), params, asyncHttpResponseHandler);
+    }
+
     /**
      *
      * @param params 上传参数
@@ -65,10 +75,7 @@ public class UploadUtil {
             File[] files = new File[spanStrings_pathes.size()];
             int count = 0;
             for (String id: spanStrings_pathes.keySet()) {
-                int pos = id.indexOf("=")+1;
-                String path = id.substring(pos,id.length()-1);
-                Log.d("UploadUtil", "abcd:" + path);
-                files[count++] = ImageUtil.persistImage(spanStrings_pathes.get(id), path);
+                files[count++] = ImageUtil.persistImage(spanStrings_pathes.get(id));
             }
             try {
                 params.put("file", files);

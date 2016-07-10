@@ -3,14 +3,17 @@ package com.softwaredesign.microbar.util;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Environment;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by mac on 16/6/3.
@@ -49,6 +52,7 @@ public class ImageUtil {
         BitmapFactory.decodeFile(filePath, options);
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
         options.inJustDecodeBounds = false;
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
 
         // 初步压缩
         // options的inSampleSize只能为2的幂,所有其它的值都会被近似成小于该值且最接近该值的2的幂
@@ -112,13 +116,14 @@ public class ImageUtil {
         ByteArrayOutputStream bOut = new ByteArrayOutputStream();
         int beginRate = 100;
         bitmap.compress(Bitmap.CompressFormat.JPEG, beginRate, bOut);
-        while(bOut.size()/1024/1024 > 100) {
+        while(bOut.size()/1024 > 100) {
             beginRate -= 10;
             bOut.reset();
             bitmap.compress(Bitmap.CompressFormat.JPEG, beginRate, bOut);
             if (beginRate == 0) break;
         }
         Log.d("ImageUtil", ""+beginRate);
+        Log.d("ImageUtil", "" + bOut.size());
         ByteArrayInputStream bIn = new ByteArrayInputStream(bOut.toByteArray());
         Bitmap newBitmap = BitmapFactory.decodeStream(bIn);
         if (newBitmap != null) {
@@ -129,9 +134,15 @@ public class ImageUtil {
         }
     }
 
-    public static File persistImage(Bitmap bitmap, String name) {
-        String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-        File tempFile = new File(extStorageDirectory, name+".jpg");
+    public static File persistImage(Bitmap bitmap) {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.CHINA).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File tempFile = null;
+        try {
+            tempFile = File.createTempFile(imageFileName, ".jpg", SDCardUtil.getFileDir(SDCardUtil.FILEDIR+"/"+SDCardUtil.CACHE));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Log.d("ImageUtil", tempFile.getAbsolutePath());
         OutputStream os;
         try {

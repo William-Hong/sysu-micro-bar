@@ -82,6 +82,18 @@ public class PostUtil {
                 .execute(callback);
     }
 
+    public static void modifyPersonalInfo(String url, int accountId, String nickname, String newPassword, Callback callback) {
+        OkHttpUtils
+                .post()
+                .url(getAbsoluteUrl(url))
+                .addParams("accountId", Integer.toString(accountId))
+                .addParams("nickname", nickname)
+                .addParams("newPassword", newPassword)
+                .build()
+                .connTimeOut(20000)
+                .execute(callback);
+    }
+
     public static void getPostDetail(String url, int postId, Callback callback) {
         OkHttpUtils
                 .post()

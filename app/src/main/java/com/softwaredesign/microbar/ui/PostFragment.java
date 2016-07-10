@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Toast;
 
 import com.google.gson.reflect.TypeToken;
 import com.softwaredesign.microbar.MyApplication;
@@ -58,7 +59,7 @@ public class PostFragment extends Fragment {
     private int accountId;
     private POSTTYPE postType;
 
-    private int firstPostId;
+    private int firstPostPosition;
 
     private StringCallback callback;
 
@@ -96,6 +97,7 @@ public class PostFragment extends Fragment {
         callback =  new StringCallback() {
             @Override
             public void onError(Request request, Exception e) {
+                Toast.makeText(fragmentActivity, "获取失败,请检查网络连接", Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
 
@@ -103,8 +105,12 @@ public class PostFragment extends Fragment {
             public void onResponse(String response) {
                 List<Post> newPosts = GsonUtil.parseList(response, new TypeToken<List<Post>>() {
                 }.getType());
-                posts.addAll(newPosts);
-                postAdapter.notifyDataSetChanged();
+                if (newPosts.isEmpty()) {
+                    Toast.makeText(fragmentActivity, "没有新消息了", Toast.LENGTH_SHORT).show();
+                } else {
+                    posts.addAll(newPosts);
+                    postAdapter.notifyDataSetChanged();
+                }
                 mLoadMoreListView.setLoading(false);
             }
         };
@@ -112,7 +118,7 @@ public class PostFragment extends Fragment {
         switch (postType) {
             case HOMEPAGE:
                 PostUtil.lookForMore(GETMORE, 0, callback);
-                firstPostId = posts.get(0).getPostId();
+                firstPostPosition = 0;
                 break;
             case HISTORY:
                 PostUtil.getHistory(RECENTLYWATCH, myApplication.getRecentlyWatches(), callback);
@@ -159,6 +165,7 @@ public class PostFragment extends Fragment {
                 case UPLOAD_POST:
                     Post post = (Post) data.getSerializableExtra("post");
                     posts.add(0, post);
+                    firstPostPosition += 1;
                     postAdapter.notifyDataSetChanged();
                     break;
                 default:
@@ -174,7 +181,7 @@ public class PostFragment extends Fragment {
             mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
-                    PostUtil.refreshForNew(REFRESH, firstPostId, new StringCallback() {
+                    PostUtil.refreshForNew(REFRESH, posts.get(firstPostPosition).getPostId(), new StringCallback() {
                         @Override
                         public void onError(Request request, Exception e) {
                             e.printStackTrace();
@@ -182,15 +189,16 @@ public class PostFragment extends Fragment {
 
                         @Override
                         public void onResponse(String response) {
-                            for (int i = 0; i < firstPostId; i++) {
+                            for (int i = 0; i < firstPostPosition; i++) {
                                 posts.remove(i);
                             }
                             List<Post> newPosts = GsonUtil.parseList(response, new TypeToken<List<Post>>() {
                             }.getType());
                             posts.addAll(0, newPosts);
-                            firstPostId = posts.get(0).getPostId();
+                            firstPostPosition = 0;
                             postAdapter.notifyDataSetChanged();
                             mLoadMoreListView.setLoading(false);
+                            mRefreshLayout.setRefreshing(false);
                         }
                     });
                 }

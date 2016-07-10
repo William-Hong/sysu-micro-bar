@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -28,6 +27,7 @@ import com.softwaredesign.microbar.R;
 import com.softwaredesign.microbar.model.Post;
 import com.softwaredesign.microbar.util.GsonUtil;
 import com.softwaredesign.microbar.util.ImageUtil;
+import com.softwaredesign.microbar.util.SDCardUtil;
 import com.softwaredesign.microbar.util.UploadUtil;
 
 import java.io.File;
@@ -145,7 +145,7 @@ public class PostActivity extends AppCompatActivity {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.CHINA).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         try {
-            return File.createTempFile(imageFileName, ".jpg", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES));
+            return File.createTempFile(imageFileName, ".jpg", SDCardUtil.getFileDir(SDCardUtil.FILEDIR+"/"+SDCardUtil.FILEPHOTO));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -174,7 +174,7 @@ public class PostActivity extends AppCompatActivity {
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                 Log.d("PostActivity", "" + statusCode);
-                Log.d("PostActiviyu", responseString);
+                Log.d("PostActivity", responseString);
             }
 
             @Override
