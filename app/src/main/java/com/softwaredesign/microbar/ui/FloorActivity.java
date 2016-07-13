@@ -144,8 +144,12 @@ public class FloorActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(String response) {
+                Log.d("FloorActivity", response);
                 List<Floor> newFloors = GsonUtil.parseList(response, new TypeToken<List<Floor>>() {
                 }.getType());
+                for (int i = 0; i < newFloors.size(); i++) {
+                    Log.d("FloorActivity", newFloors.get(i).toString());
+                }
                 floors.addAll(newFloors);
                 floorAdapter.notifyDataSetChanged();
             }

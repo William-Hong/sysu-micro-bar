@@ -117,13 +117,16 @@ public class PostFragment extends Fragment {
 
         switch (postType) {
             case HOMEPAGE:
+                posts.clear();
                 PostUtil.lookForMore(GETMORE, 0, callback);
                 firstPostPosition = 0;
                 break;
             case HISTORY:
+                posts.clear();
                 PostUtil.getHistory(RECENTLYWATCH, myApplication.getRecentlyWatches(), callback);
                 break;
             case MYPOST:
+                posts.clear();
                 PostUtil.getMyPost(GETMYPOST, accountId, callback);
                 break;
             case SEARCH:
@@ -201,6 +204,13 @@ public class PostFragment extends Fragment {
                             mRefreshLayout.setRefreshing(false);
                         }
                     });
+                }
+            });
+        } else {
+            mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+                    mRefreshLayout.setRefreshing(false);
                 }
             });
         }

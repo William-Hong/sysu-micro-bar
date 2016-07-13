@@ -10,20 +10,20 @@ public class Floor {
     private String nickname;
     private String createTime;
     private String detail;
-    private int isReply;
+    private int replyed;
     private String replyWho;
     private String replyFloorId;
 
     public Floor() {
     }
 
-    public Floor(int floorId, String headImageUrl, String nickname, String createTime, String detail, int isReply, String replyWho, String replyFloorId) {
+    public Floor(int floorId, String headImageUrl, String nickname, String createTime, String detail, int replyed, String replyWho, String replyFloorId) {
         this.floorId = floorId;
         this.headImageUrl = headImageUrl;
         this.nickname = nickname;
         this.createTime = createTime;
         this.detail = detail;
-        this.isReply = isReply;
+        this.replyed = replyed;
         this.replyWho = replyWho;
         this.replyFloorId = replyFloorId;
     }
@@ -68,12 +68,12 @@ public class Floor {
         this.detail = detail;
     }
 
-    public int getIsReply() {
-        return isReply;
+    public int getReplyed() {
+        return replyed;
     }
 
-    public void setIsReply(int isReply) {
-        this.isReply = isReply;
+    public void setReplyed(int replyed) {
+        this.replyed = replyed;
     }
 
     public String getReplyWho() {
@@ -90,5 +90,19 @@ public class Floor {
 
     public void setReplyFloorId(String replyFloorId) {
         this.replyFloorId = replyFloorId;
+    }
+
+    @Override
+    public String toString() {
+        return "Floor{" +
+                "floorId=" + floorId +
+                ", headImageUrl='" + headImageUrl + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", createTime='" + createTime + '\'' +
+                ", detail='" + detail + '\'' +
+                ", replyed=" + replyed +
+                ", replyWho='" + replyWho + '\'' +
+                ", replyFloorId='" + replyFloorId + '\'' +
+                '}';
     }
 }

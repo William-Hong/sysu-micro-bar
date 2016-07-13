@@ -26,10 +26,15 @@ import com.loopj.android.http.TextHttpResponseHandler;
 import com.softwaredesign.microbar.R;
 import com.softwaredesign.microbar.util.ImageUtil;
 import com.softwaredesign.microbar.util.PostUtil;
+import com.softwaredesign.microbar.util.SDCardUtil;
 import com.softwaredesign.microbar.util.UploadUtil;
 import com.squareup.okhttp.Request;
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.zhy.http.okhttp.callback.StringCallback;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 
@@ -56,6 +61,7 @@ public class EditAccountFragment extends Fragment {
     private Button saveAccount;
 
     private Bitmap upload_portrait;
+    private int accountId;
     private String oldPortraitUrl;
     private String oldNickname;
     private String oldPassword;
@@ -92,12 +98,24 @@ public class EditAccountFragment extends Fragment {
         userNewPassword = (EditText) v.findViewById(R.id.userNewPassword);
         saveAccount = (Button) v.findViewById(R.id.saveAccount);
         sp = fragmentActivity.getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        accountId = sp.getInt("accountId", 0);
         oldNickname = sp.getString("nickname", "");
         oldPassword = sp.getString("PASSWORD", "");
         oldPortraitUrl = sp.getString("headImageUrl", "");
-        if (!oldPortraitUrl.isEmpty()) {
+        String path = SDCardUtil.getSdPath()+SDCardUtil.FILEDIR+"/"+SDCardUtil.CACHE+"/"+"user_portrait_"+accountId+".jpg";
+        File file = new File(path);
+        // 先从本地路径读取头像
+        if (file.exists()) {
+            Picasso.with(fragmentActivity)
+                    .load(file)
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
+                    .resizeDimen(R.dimen.set_portrait_width, R.dimen.set_portrait_height)
+                    .centerInside()
+                    .into(userNewPortrait);
+        } else if (!oldPortraitUrl.isEmpty()) {
             Picasso.with(fragmentActivity)
                     .load(oldPortraitUrl)
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .placeholder(R.drawable.default_portrait)
                     .error(R.drawable.default_portrait)
                     .resizeDimen(R.dimen.set_portrait_width, R.dimen.set_portrait_height)
@@ -128,9 +146,11 @@ public class EditAccountFragment extends Fragment {
             public void onClick(View v) {
                 final String newNickname = userNewNickname.getText().toString();
                 final String newPassword = userNewPassword.getText().toString();
+                // 上传的同时将图片保存在本地
                 if (upload_portrait != null) {
                     RequestParams params = new RequestParams();
-                    UploadUtil.uploadHeadImage(params, UPLOADHEADIMAGE, sp.getInt("accountId", 0), ImageUtil.persistImage(upload_portrait), new TextHttpResponseHandler() {
+                    UploadUtil.uploadHeadImage(params, accountId, ImageUtil.storeUserPortrait(upload_portrait, accountId));
+                    UploadUtil.sendRequest(UPLOADHEADIMAGE, params, new TextHttpResponseHandler() {
                         @Override
                         public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                             Log.d("EditAccountFragment", "" + statusCode);
@@ -139,13 +159,23 @@ public class EditAccountFragment extends Fragment {
 
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                            try {
+                                JSONObject jsonObject = new JSONObject(responseString);
+                                boolean status = jsonObject.optBoolean("status");
+                                String headImageUrl = jsonObject.optString("headImageUrl");
+                                SharedPreferences.Editor editor = sp.edit();
+                                editor.putString("headImageUrl", headImageUrl);
+                                editor.apply();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                             Log.d("EditAccountFragment", responseString);
                         }
                     });
                 }
 
                 PostUtil.modifyPersonalInfo(MODIFYPERSONALINFO,
-                        sp.getInt("accountId", 0),
+                        accountId,
                         newNickname,
                         newPassword,
                         new StringCallback() {
@@ -165,6 +195,7 @@ public class EditAccountFragment extends Fragment {
                                 fragmentCallback.updateNavHeader();
                             }
                         });
+                fragmentCallback.updateNavHeader();
             }
         });
     }

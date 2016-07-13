@@ -11,9 +11,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 /**
  * Created by mac on 16/6/3.
@@ -134,9 +131,7 @@ public class ImageUtil {
         }
     }
 
-    public static File persistImage(Bitmap bitmap) {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.CHINA).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
+    public static File persistImage(Bitmap bitmap, String imageFileName) {
         File tempFile = null;
         try {
             tempFile = File.createTempFile(imageFileName, ".jpg", SDCardUtil.getFileDir(SDCardUtil.FILEDIR+"/"+SDCardUtil.CACHE));
@@ -154,5 +149,31 @@ public class ImageUtil {
             e.printStackTrace();
         }
         return tempFile;
+    }
+
+    public static File storeUserPortrait(Bitmap bitmap, int accountId) {
+        String path = SDCardUtil.getSdPath()+SDCardUtil.FILEDIR+"/"+SDCardUtil.CACHE+"/"+"user_portrait_"+ accountId + ".jpg";
+        File file = new File(path);
+        if (file.exists()) {
+            file.delete();
+        }
+        Log.d("ImageUtil", ""+file.exists());
+        file = new File(path);
+        try {
+            file.createNewFile();
+            Log.d("ImageUtil", ""+file.exists());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        OutputStream os;
+        try {
+            os = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
+            os.flush();
+            os.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return file;
     }
 }

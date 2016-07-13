@@ -97,6 +97,8 @@ public class FloorAdapter extends BaseAdapter {
             viewHolder.nickName = (TextView) convertView.findViewById(R.id.nickName);
             viewHolder.reply = (Button) convertView.findViewById(R.id.reply);
             viewHolder.time = (TextView) convertView.findViewById(R.id.time);
+            viewHolder.showReply = (TextView) convertView.findViewById(R.id.showReply);
+            viewHolder.showReply.setVisibility(View.INVISIBLE);
             viewHolder.floorContent = (TextView) convertView.findViewById(R.id.floorContent);
             convertView.setTag(viewHolder);
         } else {
@@ -130,10 +132,13 @@ public class FloorAdapter extends BaseAdapter {
         });
 
         viewHolder.time.setText(floor.getCreateTime());
-        Log.d("FloorAdapter", ""+floor.getIsReply());
-        if (floor.getIsReply() == 1) {
+        Log.d("FloorAdapter", ""+floor.getReplyed());
+        if (floor.getReplyed() == 1) {
+            viewHolder.showReply.setVisibility(View.VISIBLE);
             String replyWho = floor.getReplyWho();
-            floor.setDetail("回复 "+replyWho + ":\n" + floor.getDetail());
+            viewHolder.showReply.setText("回复 "+ replyWho + ":");
+        } else {
+            viewHolder.showReply.setVisibility(View.INVISIBLE);
         }
         // 异步加载floorContent
         Spanned spanned = Html.fromHtml(floor.getDetail(), new Html.ImageGetter() {
@@ -147,7 +152,7 @@ public class FloorAdapter extends BaseAdapter {
 //                } else {
 //                    loadingImage = mContext.getResources().getDrawable(R.drawable.default_portrait);
 //                }
-                Bitmap defaultLoading = ImageUtil.decodeSampledBitmapFromResource(mResources, R.drawable.default_portrait, bitmapWidth, bitmapWidth);
+                Bitmap defaultLoading = ImageUtil.decodeSampledBitmapFromResource(mResources, R.drawable.default_loading, bitmapWidth, bitmapWidth);
                 loadingImage = new BitmapDrawable(mResources, defaultLoading);
                 levelListDrawable.addLevel(0, 0, loadingImage);
                 levelListDrawable.setBounds(0, 0, loadingImage.getIntrinsicWidth(), loadingImage.getIntrinsicHeight());
@@ -215,6 +220,7 @@ public class FloorAdapter extends BaseAdapter {
         private TextView nickName;
         private Button reply;
         private TextView time;
+        private TextView showReply;
         private TextView floorContent;
     }
 

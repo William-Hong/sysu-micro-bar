@@ -52,8 +52,8 @@ public class RegisterActivity extends AppCompatActivity {
     private TextView toLogin;
     private SharedPreferences sp;
 
-    private final String URL =
-            "http://119.29.178.68:8080/sysu-micro-bar/account/doRegister";
+    private final String URL = "http://119.29.178.68:8080/sysu-micro-bar/account/doRegister";
+    //private final String URL = "http://xxx.tunnel.qydev.com/sysu-micro-bar/account/doRegister";
 
     private static final char[] CHARS = {'0', '1', '2', '3', '4', '5', '6',
             '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',

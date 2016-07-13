@@ -10,7 +10,10 @@ import com.loopj.android.http.RequestParams;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -18,6 +21,7 @@ import java.util.Map;
  */
 public class UploadUtil {
     private static final String BASE_URL = "http://119.29.178.68:8080/sysu-micro-bar/";
+    //private static final String BASE_URL = "http://xxx.tunnel.qydev.com/sysu-micro-bar/";
     private static AsyncHttpClient client = new AsyncHttpClient();
 
     static {
@@ -38,14 +42,14 @@ public class UploadUtil {
         return params;
     }
 
-    public static void uploadHeadImage(RequestParams params, String url, int accountId, File file, AsyncHttpResponseHandler asyncHttpResponseHandler) {
+    public static RequestParams uploadHeadImage(RequestParams params, int accountId, File file) {
         params.put("accountId", accountId);
         try {
             params.put("file", file);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        client.post(getAbsoluteUrl(url), params, asyncHttpResponseHandler);
+        return params;
     }
 
     /**
@@ -75,7 +79,9 @@ public class UploadUtil {
             File[] files = new File[spanStrings_pathes.size()];
             int count = 0;
             for (String id: spanStrings_pathes.keySet()) {
-                files[count++] = ImageUtil.persistImage(spanStrings_pathes.get(id));
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.CHINA).format(new Date());
+                String imageFileName = "JPEG_" + timeStamp + "_";
+                files[count++] = ImageUtil.persistImage(spanStrings_pathes.get(id), imageFileName);
             }
             try {
                 params.put("file", files);
@@ -89,6 +95,10 @@ public class UploadUtil {
 
     public static void sendMultipartRequest(String url, RequestParams params, AsyncHttpResponseHandler asyncHttpResponseHandler) {
         params.setForceMultipartEntityContentType(true);
+        client.post(getAbsoluteUrl(url), params, asyncHttpResponseHandler);
+    }
+
+    public static void sendRequest(String url, RequestParams params, AsyncHttpResponseHandler asyncHttpResponseHandler) {
         client.post(getAbsoluteUrl(url), params, asyncHttpResponseHandler);
     }
 

@@ -1,7 +1,9 @@
 package com.softwaredesign.microbar.ui;
 
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -20,9 +22,13 @@ import android.widget.Toast;
 
 import com.softwaredesign.microbar.R;
 import com.softwaredesign.microbar.util.PostUtil;
+import com.softwaredesign.microbar.util.SDCardUtil;
 import com.squareup.okhttp.Request;
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 import com.zhy.http.okhttp.callback.StringCallback;
+
+import java.io.File;
 
 
 public class MainActivity extends AppCompatActivity implements EditAccountFragment.FragmentCallback{
@@ -65,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements EditAccountFragme
 
         accountId = sp.getInt("accountId", -1);
         updateNavHeader();
-        checkForNew();
+        //checkForNew();
     }
 
     public void init() {
@@ -139,6 +145,22 @@ public class MainActivity extends AppCompatActivity implements EditAccountFragme
                         }
                         break;
                     case R.id.menu_exit:
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("清除账号信息并退出?")
+                                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        sp.edit().clear().apply();
+                                        finish();
+                                    }
+                                })
+                                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // do nothing;
+                                    }
+                                })
+                                .show();
                         break;
                     default:
                         break;
@@ -164,9 +186,20 @@ public class MainActivity extends AppCompatActivity implements EditAccountFragme
         Log.d("MainActivity", nickname);
         Log.d("MainActivity", headImageUrl);
         userName.setText(nickname);
-        if (!headImageUrl.isEmpty()) {
+        String path = SDCardUtil.getSdPath()+SDCardUtil.FILEDIR+"/"+SDCardUtil.CACHE+"/"+"user_portrait_"+accountId+".jpg";
+        File file = new File(path);
+        // 先从本地路径读取头像
+        if (file.exists()) {
+            Picasso.with(this)
+                    .load(file)
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
+                    .resizeDimen(R.dimen.portrait_width, R.dimen.portrait_height)
+                    .centerInside()
+                    .into(userPortrait);
+        } else if (!headImageUrl.isEmpty()) {
             Picasso.with(this)
                     .load(headImageUrl)
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .placeholder(R.drawable.default_portrait)  //默认(加载前)头像
                     .error(R.drawable.default_portrait)  //加载失败时的头像
                     .resizeDimen(R.dimen.portrait_width, R.dimen.portrait_height)
