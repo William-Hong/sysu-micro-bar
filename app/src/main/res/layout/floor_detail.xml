@@ -59,11 +59,17 @@
 
         </LinearLayout>
     </LinearLayout>
-
+    <TextView
+        android:id="@+id/showReply"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:text="回复"/>
     <TextView
         android:id="@+id/floorContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="18sp"
-        android:textStyle="bold" />
+        />
 </LinearLayout>

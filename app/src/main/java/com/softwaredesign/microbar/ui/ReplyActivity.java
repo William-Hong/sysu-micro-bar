@@ -1,6 +1,9 @@
 package com.softwaredesign.microbar.ui;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -18,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
@@ -55,6 +59,10 @@ public class ReplyActivity extends AppCompatActivity {
 
     private Uri outputFileUri;
 
+    private ProgressDialog progressDialog;
+    private SharedPreferences sp;
+    private int accountId;
+
     private int type;
     private int postId;
     private String nickName;
@@ -74,6 +82,8 @@ public class ReplyActivity extends AppCompatActivity {
             postId = bundle.getInt("postId");
         }
         init();
+        sp = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        accountId = sp.getInt("accountId", -1);
     }
 
     @Override
@@ -147,19 +157,24 @@ public class ReplyActivity extends AppCompatActivity {
 
     public void commitReply() {
         RequestParams params = new RequestParams();
-        params.put("accountId", 1);
+        params.put("accountId", accountId);
         params.put("postId", postId);
         params.put("replyFloorId", replyFloorId);
         UploadUtil.addContent(params, replyContent, pictures);
+        progressDialog = ProgressDialog.show(this, "创建回复中","请稍候...",true);
         UploadUtil.sendMultipartRequest(CREATEREPLY, params, new TextHttpResponseHandler() {
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                progressDialog.dismiss();
+                Toast.makeText(ReplyActivity.this, "上传失败,请检查网络", Toast.LENGTH_SHORT).show();
                 Log.d("ReplyActivity", "" + statusCode);
                 Log.d("ReplyActiviyu", responseString);
             }
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                progressDialog.dismiss();
+                Toast.makeText(ReplyActivity.this, "上传成功", Toast.LENGTH_SHORT).show();
                 // setResult
                 finish();
             }
@@ -168,19 +183,23 @@ public class ReplyActivity extends AppCompatActivity {
 
     public void createFloor() {
         RequestParams params = new RequestParams();
-        params.put("accountId", 1);
+        params.put("accountId", accountId);
         params.put("postId", postId);
         UploadUtil.addContent(params, replyContent, pictures);
+        progressDialog = ProgressDialog.show(this, "发表评论中","请稍候...",true);
         UploadUtil.sendMultipartRequest(CREATEFLOOR, params, new TextHttpResponseHandler() {
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                progressDialog.dismiss();
+                Toast.makeText(ReplyActivity.this, "上传失败,请检查网络", Toast.LENGTH_SHORT).show();
                 Log.d("ReplyActivity", "" + statusCode);
-                Log.d("ReplyActiviyu", responseString);
+                Log.d("ReplyActivity", responseString);
             }
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                Log.d("ReplyActivity", responseString);
+                progressDialog.dismiss();
+                Toast.makeText(ReplyActivity.this, "上传成功", Toast.LENGTH_SHORT).show();
                 // setResult
                 finish();
             }

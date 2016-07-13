@@ -13,6 +13,7 @@ import java.util.LinkedHashSet;
  */
 public class PostUtil {
     private static final String BASE_URL = "http://119.29.178.68:8080/sysu-micro-bar/";
+    //private static final String BASE_URL = "http://xxx.tunnel.qydev.com/sysu-micro-bar/";
 
     // 查看更多帖子
     public static void lookForMore(String url, int postTotal, Callback callback) {
@@ -66,7 +67,7 @@ public class PostUtil {
         OkHttpUtils
                 .post()
                 .url(getAbsoluteUrl(url))
-                .addParams("abc", sb.toString())
+                .addParams("postIds", sb.toString())
                 .build()
                 .connTimeOut(20000)
                 .execute(callback);
@@ -77,6 +78,18 @@ public class PostUtil {
                 .post()
                 .url(getAbsoluteUrl(url))
                 .addParams("accountId", Integer.toString(accountId))
+                .build()
+                .connTimeOut(20000)
+                .execute(callback);
+    }
+
+    public static void modifyPersonalInfo(String url, int accountId, String nickname, String newPassword, Callback callback) {
+        OkHttpUtils
+                .post()
+                .url(getAbsoluteUrl(url))
+                .addParams("accountId", Integer.toString(accountId))
+                .addParams("nickname", nickname)
+                .addParams("newPassword", newPassword)
                 .build()
                 .connTimeOut(20000)
                 .execute(callback);

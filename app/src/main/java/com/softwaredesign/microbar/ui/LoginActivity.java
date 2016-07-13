@@ -30,6 +30,7 @@ public class LoginActivity extends AppCompatActivity {
     private String id;
     private String password;
     private String login_url = "http://119.29.178.68:8080/sysu-micro-bar/account/doLogin";
+    //private String login_url = "http://xxx.tunnel.qydev.com/sysu-micro-bar/account/doLogin";
 
     private SharedPreferences sp;
 

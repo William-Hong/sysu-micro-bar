@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <ImageView
+            android:id="@+id/userNewPortrait"
+            android:layout_width="@dimen/set_portrait_width"
+            android:layout_height="@dimen/set_portrait_height"
+            android:layout_gravity="center"
+            android:src="@drawable/default_portrait"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+        <ImageButton
+            android:id="@+id/addFromGallery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_insert_photo_white_24dp"
+            android:layout_alignTop="@+id/userNewPortrait"
+            android:layout_alignLeft="@+id/addFromCamera"
+            android:layout_alignStart="@+id/addFromCamera" />
+        <ImageButton
+            android:id="@+id/addFromCamera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_camera_white_24dp"
+            android:layout_alignBottom="@+id/userNewPortrait"
+            android:layout_toRightOf="@+id/userNewPortrait"
+            android:layout_toEndOf="@+id/userNewPortrait" />
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_weight="1">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="新昵称:"
+            style="@style/MyTextView"/>
+        <EditText
+            android:id="@+id/userNewNickname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="输入新昵称"
+            style="@style/MyTextView"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="新密码:"
+            style="@style/MyTextView"/>
+        <EditText
+            android:id="@+id/userNewPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="输入新密码"
+            style="@style/MyTextView"
+            android:inputType="textPassword"/>
+    </LinearLayout>
+    <Button
+        android:id="@+id/saveAccount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="保存"
+        android:gravity="center"
+        android:background="@drawable/shape"
+        style="@style/MyTextView"/>
+</LinearLayout>

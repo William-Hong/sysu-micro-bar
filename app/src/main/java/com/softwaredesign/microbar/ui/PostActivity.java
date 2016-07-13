@@ -1,11 +1,13 @@
 package com.softwaredesign.microbar.ui;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -21,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.TextHttpResponseHandler;
@@ -28,6 +31,7 @@ import com.softwaredesign.microbar.R;
 import com.softwaredesign.microbar.model.Post;
 import com.softwaredesign.microbar.util.GsonUtil;
 import com.softwaredesign.microbar.util.ImageUtil;
+import com.softwaredesign.microbar.util.SDCardUtil;
 import com.softwaredesign.microbar.util.UploadUtil;
 
 import java.io.File;
@@ -58,6 +62,10 @@ public class PostActivity extends AppCompatActivity {
     // Key: uuid, Value: path
     private LinkedHashMap<String, Bitmap> pictures;
 
+    private SharedPreferences sp;
+    private int accountId;
+    private ProgressDialog progressDialog;
+
     private Uri outputFileUri;
 
     @Override
@@ -66,6 +74,8 @@ public class PostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_post);
         init();
         setListener();
+        sp = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        accountId = sp.getInt("accountId", -1);
     }
 
     @Override
@@ -145,7 +155,7 @@ public class PostActivity extends AppCompatActivity {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.CHINA).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         try {
-            return File.createTempFile(imageFileName, ".jpg", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES));
+            return File.createTempFile(imageFileName, ".jpg", SDCardUtil.getFileDir(SDCardUtil.FILEDIR+"/"+SDCardUtil.FILEPHOTO));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -168,17 +178,22 @@ public class PostActivity extends AppCompatActivity {
      */
     public void uploadPost() {
         RequestParams params = new RequestParams();
-        UploadUtil.addTitleAndTag(params, 1, postTitle, postTag);
+        UploadUtil.addTitleAndTag(params, accountId, postTitle, postTag);
         UploadUtil.addContent(params, postContent, pictures);
+        progressDialog = ProgressDialog.show(this, "上传帖子中","请稍候...",true);
         UploadUtil.sendMultipartRequest(CREATEPOST, params, new TextHttpResponseHandler() {
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                progressDialog.dismiss();
+                Toast.makeText(PostActivity.this, "上传失败,请检查网络", Toast.LENGTH_SHORT).show();
                 Log.d("PostActivity", "" + statusCode);
-                Log.d("PostActiviyu", responseString);
+                Log.d("PostActivity", responseString);
             }
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                progressDialog.dismiss();
+                Toast.makeText(PostActivity.this, "上传成功", Toast.LENGTH_SHORT).show();
                 Post post = GsonUtil.parse(responseString, Post.class);
                 Intent intent = new Intent();
                 intent.putExtra("post", post);

@@ -4,4 +4,6 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="portrait_width">60dp</dimen>
     <dimen name="portrait_height">60dp</dimen>
+    <dimen name="set_portrait_width">120dp</dimen>
+    <dimen name="set_portrait_height">120dp</dimen>
 </resources>

@@ -1,6 +1,9 @@
 package com.softwaredesign.microbar;
 
 import android.app.Application;
+import android.util.Log;
+
+import com.softwaredesign.microbar.util.SDCardUtil;
 
 import java.util.LinkedHashSet;
 
@@ -14,6 +17,13 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         recentlyWatches = new LinkedHashSet<>();
+        if (SDCardUtil.checkSdCard()) {
+            SDCardUtil.createFileDir(SDCardUtil.FILEDIR);
+            SDCardUtil.createFileDir(SDCardUtil.FILEDIR+"/"+SDCardUtil.FILEPHOTO);
+            SDCardUtil.createFileDir(SDCardUtil.FILEDIR+"/"+SDCardUtil.CACHE);
+        } else {
+            Log.d("MyApplication", "创建失败");
+        }
         super.onCreate();
     }
 
